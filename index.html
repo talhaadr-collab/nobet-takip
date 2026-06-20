@@ -15,7 +15,7 @@
         const fullUrl = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
         const script = document.createElement('script');
         const timeout = setTimeout(() => { addLog(label + ': ❌ TIMEOUT'); resolve(); }, 8000);
-        window[cbName] = (data) => { clearTimeout(timeout); addLog(label + ': ✓ OK - ' + JSON.stringify(data).slice(0,100)); resolve(); };
+        window[cbName] = (data) => { clearTimeout(timeout); addLog(label + ': ✓ OK'); resolve(); };
         script.onerror = () => { clearTimeout(timeout); addLog(label + ': ❌ SCRIPT ERROR'); resolve(); };
         script.src = fullUrl;
         document.body.appendChild(script);
@@ -23,26 +23,17 @@
     }
 
     async function runTests() {
-      // G: action + 2 param ama isimler username/pwd değil, kısa
-      await testCall('G) action+u+p (kısa isim)', API_URL + '?action=login&u=admin&p=1234');
+      // K: action=getAll ama "login" kelimesi başka bir parametrede geçiyor
+      await testCall('K) getAll + login kelimesi başka yerde', API_URL + '?action=getAll&note=login');
 
-      // H: tek parametre, değerler birleşik
-      await testCall('H) action + tek combo param', API_URL + '?action=login&c=admin:1234');
+      // L: action=xyz (login değil, getAll de değil - tamamen farklı zararsız isim)
+      await testCall('L) action=xyz (rastgele isim)', API_URL + '?action=xyz');
 
-      // I: action+username+pwd ama farklı sırada (callback önce)
-      const cbName2 = '_t_' + Date.now() + '_x';
-      await new Promise((resolve) => {
-        const url2 = API_URL + '?callback=' + cbName2 + '&action=login&username=admin&pwd=1234';
-        const script = document.createElement('script');
-        const timeout = setTimeout(() => { addLog('I) callback en başta: ❌ TIMEOUT'); resolve(); }, 8000);
-        window[cbName2] = (data) => { clearTimeout(timeout); addLog('I) callback en başta: ✓ OK'); resolve(); };
-        script.onerror = () => { clearTimeout(timeout); addLog('I) callback en başta: ❌ SCRIPT ERROR'); resolve(); };
-        script.src = url2;
-        document.body.appendChild(script);
-      });
+      // M: action=getShifts (zaten var olan başka bir action, login değil)
+      await testCall('M) action=getShifts', API_URL + '?action=getShifts');
 
-      // J: action=login ama username/pwd YOK (eksik login denemesi gibi)
-      await testCall('J) sadece action=login, param yok', API_URL + '?action=login');
+      // N: action=signin (login yerine farklı kelime - henüz Apps Script'te tanımlı değil ama deneyelim)
+      await testCall('N) action=signin', API_URL + '?action=signin');
 
       addLog('<br><b>TÜM TESTLER BİTTİ</b>');
     }
