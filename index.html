@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-size:15px; padding:14px; font-family:sans-serif; word-break:break-all;">
+  <div id="result">Test başlıyor...</div>
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzRwDhYWXAXCkSGctMxRC0Qyq75YgvvC7isdKuGHJOog2VG3k3Dm9gUInsH896aa6klIg/exec';
+    const resultEl = document.getElementById('result');
+    let log = [];
+    function addLog(msg) {
+      log.push(msg);
+      resultEl.innerHTML = log.join('<br><br>');
+    }
+
+    function testCall(label, url) {
+      return new Promise((resolve) => {
+        const cbName = '_t_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+        const fullUrl = url + '&callback=' + cbName;
+        const script = document.createElement('script');
+        const timeout = setTimeout(() => {
+          addLog(label + ': ❌ TIMEOUT');
+          resolve();
+        }, 8000);
+        window[cbName] = (data) => {
+          clearTimeout(timeout);
+          addLog(label + ': ✓ OK');
+          resolve();
+        };
+        script.onerror = () => {
+          clearTimeout(timeout);
+          addLog(label + ': ❌ SCRIPT ERROR');
+          resolve();
+        };
+        script.src = fullUrl;
+        document.body.appendChild(script);
+      });
+    }
+
+    async function runTests() {
+      await testCall('A) action tek başına', API_URL + '?action=getAll');
+      await testCall('B) action + 1 param (username)', API_URL + '?action=login&username=admin');
+      await testCall('C) action + 1 param (pwd)', API_URL + '?action=login&pwd=1234');
+      await testCall('D) action + username + pwd', API_URL + '?action=login&username=admin&pwd=1234');
+      await testCall('E) action + xx + yy (zararsız isimler)', API_URL + '?action=login&xx=admin&yy=1234');
+      await testCall('F) sadece sayısal değerler', API_URL + '?action=login&a=1&b=2');
+      addLog('<br><b>TÜM TESTLER BİTTİ</b>');
+    }
+    runTests();
+  </script>
+</body>
+</html>
