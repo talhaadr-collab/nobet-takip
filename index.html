@@ -646,18 +646,26 @@ function isInAppInventor() {
   return !!(window.AppInventor && typeof window.AppInventor.setWebViewString === 'function');
 }
 
-let _jsonpCounter = 0;
-function apiGet(action, params) {
-  function buildUrl() {
-    let url = CONFIG.API_URL + '?action=' + encodeURIComponent(action);
-    if (params) {
-      for (const k in params) {
-        url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-      }
+async function apiGet(action, params) {
+  let url = CONFIG.API_URL + '?action=' + encodeURIComponent(action);
+  if (params) {
+    for (const k in params) {
+      url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
     }
-    return url;
   }
-
+  
+  try {
+    const response = await fetch(url, { 
+      method: 'GET',
+      redirect: 'follow' 
+    });
+    
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
   // ── MOD 2: App Inventor köprüsü ──
   if (isInAppInventor()) {
     return new Promise((resolve, reject) => {
@@ -709,13 +717,24 @@ function apiGet(action, params) {
 }
 
 // Yazma işlemleri de aynı apiGet üzerinden yapılır (her iki modda da çalışır)
-async function apiPost(body) {
-  const action = body.action;
-  const params = { ...body };
-  delete params.action;
-  return apiGet(action, params);
-}
+async function apiPost(bodyData) {
+  try {
+    const response = await fetch(CONFIG.API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      body: JSON.stringify(bodyData),
+      headers: {
+        // Apps Script'in CORS kısıtlamasını aşmak için application/json yerine text/plain kullanıyoruz
+        'Content-Type': 'text/plain;charset=utf-8' 
+      }
+    });
 
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
 // ════════════════════════════════════════════════════════════════
 // AUTH
 // ════════════════════════════════════════════════════════════════
