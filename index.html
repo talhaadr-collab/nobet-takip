@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Nöbet Takip</title>
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#1a237e" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Nöbet Takip" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+:root {
+  --primary:       #1a237e;
+  --primary-mid:   #283593;
+  --primary-light: #e8eaf6;
+  --primary-dark:  #0d1257;
+  --accent:        #0288d1;
+  --accent-light:  #e1f5fe;
+  --bg:            #f0f2f8;
+  --surface:       #ffffff;
+  --border:        #dde1f0;
+  --border-light:  #eef0f8;
+  --text:          #1a1f3a;
+  --text-2:        #5c6185;
+  --text-3:        #9da3c2;
+  --danger:        #c62828;
+  --danger-light:  #ffebee;
+  --success:       #1b5e20;
+  --success-light: #e8f5e9;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; }
+
+/* ── LOGIN ── */
+.login-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 32px 24px;
+  background: linear-gradient(160deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-mid) 100%);
+  min-height: 100vh;
+}
+.login-logo { width: 88px; height: 88px; margin-bottom: 16px; }
+.login-logo img { width: 100%; height: 100%; object-fit: contain; }
+.login-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -0.3px; }
+.login-sub { font-size: 13px; color: rgba(255,255,255,0.65); margin-bottom: 32px; }
+.login-card {
+  width: 100%; max-width: 340px;
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-lg); padding: 24px;
+}
+.login-field { margin-bottom: 14px; }
+.login-field label { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.login-field input {
+  width: 100%; height: 46px; padding: 0 14px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-md); color: #fff; font-size: 15px;
+  font-family: inherit;
+}
+.login-field input::placeholder { color: rgba(255,255,255,0.4); }
+.login-field input:focus { outline: none; border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.18); }
+.login-btn {
+  width: 100%; height: 48px; border: none; border-radius: var(--radius-md);
+  background: #fff; color: var(--primary-dark); font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 6px; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.login-btn:disabled { opacity: 0.6; }
+.login-error { color: #ffcdd2; font-size: 13px; margin-top: 12px; text-align: center; display: none; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--primary);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 20;
+  box-shadow: 0 2px 8px rgba(26,35,126,0.3);
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-logo { width: 34px; height: 34px; flex-shrink: 0; }
+.topbar-logo img { width: 100%; height: 100%; object-fit: contain; }
+.topbar-title { font-size: 15px; font-weight: 600; color: #fff; line-height: 1.2; }
+.topbar-sub { font-size: 11px; color: rgba(255,255,255,0.65); }
+.logout-btn { background: rgba(255,255,255,0.12); border: none; color: rgba(255,255,255,0.85); font-size: 13px; padding: 7px 12px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+
+/* ── TABS ── */
+.tabbar {
+  display: flex; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 58px; z-index: 19;
+}
+.tab {
+  flex: 1; padding: 11px 4px; text-align: center;
+  font-size: 12px; font-weight: 600; color: var(--text-2);
+  border-bottom: 2px solid transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  letter-spacing: 0.2px;
+}
+.tab i { font-size: 16px; }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* ── SCREENS ── */
+.screen { display: none; flex: 1; padding: 14px 14px 90px; flex-direction: column; gap: 10px; }
+.screen.active { display: flex; }
+
+/* ── DATE NAV ── */
+.date-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 10px 14px;
+}
+.date-nav-btn {
+  width: 36px; height: 36px; border-radius: var(--radius-md);
+  background: var(--primary-light); color: var(--primary);
+  border: none; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; flex-shrink: 0;
+}
+.date-nav-center { text-align: center; flex: 1; cursor: pointer; }
+.date-nav-day { font-size: 12px; color: var(--text-2); }
+.date-nav-date { font-size: 15px; font-weight: 600; color: var(--text); }
+.today-pill { display: inline-block; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 1px 8px; border-radius: 99px; margin-top: 3px; }
+
+/* ── SUMMARY ROW ── */
+.summary-row { display: flex; align-items: center; justify-content: space-between; padding: 2px; }
+.summary-text { font-size: 13px; color: var(--text-2); }
+.summary-text b { color: var(--text); font-weight: 600; }
+.btn-add {
+  background: var(--primary); color: #fff; border: none;
+  border-radius: 99px; padding: 7px 14px; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: inherit;
+}
+.btn-clear {
+  background: var(--danger-light); color: var(--danger); border: none;
+  border-radius: 99px; padding: 7px 14px; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: inherit;
+}
+
+/* ── CATEGORY CARD ── */
+.cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.cat-header { display: flex; align-items: center; gap: 9px; padding: 11px 14px; border-bottom: 1px solid var(--border-light); }
+.cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cat-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
+.cat-count { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; }
+.cat-add-btn { background: none; border: none; color: var(--text-3); font-size: 18px; padding: 2px; cursor: pointer; display: flex; }
+.staff-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--border-light); }
+.staff-row:last-child { border-bottom: none; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.staff-info { flex: 1; }
+.staff-name-text { font-size: 14px; font-weight: 500; color: var(--text); }
+.staff-shift-text { font-size: 12px; color: var(--text-2); }
+.empty-row { display: flex; align-items: center; gap: 8px; padding: 14px; color: var(--text-3); font-size: 13px; font-style: italic; }
+
+/* ── WEEKLY TABLE ── */
+.week-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-x: auto; }
+table.week-table { width: 100%; border-collapse: collapse; min-width: 520px; table-layout: fixed; }
+table.week-table th { font-size: 11px; font-weight: 700; color: var(--text-2); padding: 8px 4px; text-align: center; background: var(--bg); border-bottom: 1px solid var(--border); width: 68px; }
+table.week-table th:first-child { text-align: left; padding-left: 12px; width: 100px; }
+table.week-table td { padding: 5px 4px; text-align: center; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+table.week-table td:first-child { text-align: left; padding-left: 10px; font-weight: 600; font-size: 12px; border-left: 3px solid transparent; vertical-align: middle; }
+table.week-table tr:last-child td { border-bottom: none; }
+.week-names-cell { display: flex; flex-direction: column; gap: 3px; }
+.week-name-badge { border-radius: 5px; padding: 2px 4px; font-size: 10px; font-weight: 600; line-height: 1.3; cursor: pointer; word-break: break-word; }
+.week-name-badge:active { opacity: 0.7; }
+.week-empty { color: var(--text-3); font-size: 13px; }
+.week-cat-label { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.week-cat-add { background: var(--primary-light); color: var(--primary); border: none; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; flex-shrink: 0; }
+
+/* ── ADMIN ── */
+.admin-tabs { display: flex; gap: 8px; }
+.admin-tab { flex: 1; padding: 9px; text-align: center; font-size: 13px; font-weight: 600; border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; }
+.admin-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+.form-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+.form-field { margin-bottom: 10px; }
+.form-field label { display: block; font-size: 11px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+.form-field input, .form-field select { width: 100%; height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg); color: var(--text); font-size: 14px; font-family: inherit; }
+.form-field input:focus, .form-field select:focus { outline: none; border-color: var(--primary); }
+.btn-primary { width: 100%; height: 46px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; margin-top: 4px; }
+.list-label { font-size: 11px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px; margin: 4px 2px 0; }
+.list-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; }
+.list-row-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+.cat-dot-lg { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.btn-del { background: none; border: none; color: var(--danger); font-size: 18px; padding: 4px; cursor: pointer; display: flex; }
+.staff-cat-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; margin-top: 3px; }
+.color-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.color-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
+.color-dot.sel { border-color: var(--text); }
+
+/* ── ASSIGN MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+.modal-overlay.active { display: flex; }
+.modal-sheet { background: var(--surface); width: 100%; max-width: 480px; border-radius: 18px 18px 0 0; padding: 18px 16px 32px; max-height: 88vh; overflow-y: auto; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-title { font-size: 17px; font-weight: 700; color: var(--text); }
+.modal-close { background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-2); font-size: 16px; }
+.modal-field { margin-top: 14px; }
+.modal-field label { display: block; font-size: 11px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chip { display: flex; align-items: center; gap: 6px; border: 1.5px solid var(--border); border-radius: 99px; padding: 7px 13px; font-size: 13px; cursor: pointer; background: var(--surface); color: var(--text); transition: all 0.12s; }
+.chip.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+.chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+.day-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.day-check { display: flex; align-items: center; gap: 7px; border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 7px 11px; cursor: pointer; background: var(--surface); font-size: 13px; color: var(--text-2); user-select: none; }
+.day-check.checked { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.day-check.has-entry { border-style: dashed; }
+.day-check-box { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; }
+.day-check.checked .day-check-box { background: var(--primary); border-color: var(--primary); color: #fff; }
+.modal-save-btn { width: 100%; height: 48px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; margin-top: 18px; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 200; white-space: nowrap; max-width: 90%; text-align: center; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err { background: var(--danger); }
+
+/* ── LOADING ── */
+.loading-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--primary-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--text-2); }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- LOGIN -->
+  <div id="login-wrap" class="login-wrap">
+    <div class="login-logo">
+      <img src="./icon-192.png" alt="logo" onerror="this.style.display='none'" />
+    </div>
+    <div class="login-title">Nöbet Takip</div>
+    <div class="login-sub">Personel nöbet çizelgesi sistemi</div>
+    <div class="login-card">
+      <div class="login-field">
+        <label>Kullanıcı Adı</label>
+        <input id="inp-user" type="text" autocomplete="username" placeholder="kullanıcı adınız" />
+      </div>
+      <div class="login-field">
+        <label>Şifre</label>
+        <input id="inp-pass" type="password" autocomplete="current-password" placeholder="şifreniz" />
+      </div>
+      <button class="login-btn" id="login-btn" onclick="doLogin()">
+        <i class="ti ti-login-2"></i> Giriş Yap
+      </button>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main-wrap" style="display:none; flex-direction:column; flex:1;">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-logo">
+          <img src="./icon-192.png" alt="logo" onerror="this.style.display='none'" />
+        </div>
+        <div>
+          <div class="topbar-title">Nöbet Takip</div>
+          <div class="topbar-sub" id="user-info">—</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">
+        <i class="ti ti-logout"></i> Çıkış
+      </button>
+    </div>
+
+    <div class="tabbar" id="tabbar">
+      <div class="tab active" data-tab="weekly" onclick="switchTab('weekly')">
+        <i class="ti ti-layout-grid"></i> Haftalık
+      </div>
+      <div class="tab" data-tab="admin" id="admin-tab" onclick="switchTab('admin')" style="display:none">
+        <i class="ti ti-settings"></i> Yönetim
+      </div>
+    </div>
+
+    <div id="weekly-screen" class="screen active"></div>
+    <div id="admin-screen" class="screen"></div>
+  </div>
+
+</div>
+
+<!-- NÖBET ATAMA MODAL -->
+<div class="modal-overlay" id="assign-modal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title">Nöbet Ata</div>
+      <button class="modal-close" onclick="closeAssignModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-field">
+      <label>1. Kategori</label>
+      <div class="chip-row" id="assign-cat-chips"></div>
+    </div>
+    <div class="modal-field">
+      <label>2. Personel</label>
+      <select id="assign-staff-sel"></select>
+    </div>
+    <div class="modal-field">
+      <label>3. Günler</label>
+      <div class="day-checks" id="assign-day-checks"></div>
+    </div>
+    <button class="modal-save-btn" id="assign-save-btn" onclick="saveAssignment()">
+      <i class="ti ti-check"></i> Kaydet
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+// ════════════════════════════════════════════
+// FIREBASE KURULUMU
+// ════════════════════════════════════════════
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, set, push, remove, onValue, off }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDBV9z_cg6n7fgNAxLNa7di4VEkrh_tJzc",
+  authDomain: "nobet-bd590.firebaseapp.com",
+  databaseURL: "https://nobet-bd590-default-rtdb.firebaseio.com",
+  projectId: "nobet-bd590",
+  storageBucket: "nobet-bd590.firebasestorage.app",
+  messagingSenderId: "733991241565",
+  appId: "1:733991241565:web:2a1267df3c3d90f41e4ab4"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getDatabase(fbApp);
+
+// ════════════════════════════════════════════
+// SABITLER
+// ════════════════════════════════════════════
+const WEEK_DAYS  = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+const DAY_NAMES  = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+const SHIFT_DEF  = '08:00-16:00';
+const CAT_COLORS = ['#1a237e','#1565c0','#0277bd','#00695c','#2e7d32','#558b2f','#6a1b9a','#880e4f','#bf360c','#4e342e'];
+
+const DEFAULT_STAFF = [
+  { name: 'KADİR KURŞUNCU',       category: 'Kanal Arıza Ekibi' },
+  { name: 'DERVİŞ ADANALI',       category: 'Kamyon Şoförü'     },
+  { name: 'ALİ GÜYEN',            category: 'Kanal Arıza Ekibi' },
+  { name: 'MEVLÜT İŞCAN',         category: 'Kamyon Şoförü'     },
+  { name: 'SAMET ÖZTÜRK',         category: 'Kanal Arıza Ekibi' },
+  { name: 'ANIL KAYA',            category: 'Su Arıza Ekibi'    },
+  { name: 'ZEKİ GÜLSOY',          category: 'Şoför'             },
+  { name: 'İBRAHİM VEHBİ YAĞCILAR', category: 'Şoför'           },
+  { name: 'AHMET ARAN',           category: 'Elektrik'           },
+  { name: 'İBRAHİM ÖZDEMİR',      category: 'Elektrik'           },
+  { name: 'BURAK YILMAZ',         category: 'Kamyon Şoförü'     },
+  { name: 'ASLAN OYLU',           category: 'Operatör'           },
+  { name: 'CİHAT BAYRAM',         category: 'Operatör'           },
+  { name: 'BAHATTİN AYAZ',        category: 'Su Arıza Ekibi'    },
+  { name: 'ZEKİ BOZDEMİR',        category: 'Su Arıza Ekibi'    },
+  { name: 'ADEM ÇETİNKAYA',       category: 'Su Arıza Ekibi'    },
+  { name: 'HÜSEYİN ÇAKMAK',       category: 'Su Arıza Ekibi'    },
+  { name: 'HASAN BAKIR',          category: 'Su Arıza Ekibi'    },
+  { name: 'BAYRAM KOYUNCU',       category: 'Operatör'           },
+  { name: 'MUSTAFA KANBUR',       category: 'Kamyon Şoförü'     },
+  { name: 'ALİ AYGÜL',            category: 'Kanal Arıza Ekibi' },
+  { name: 'KAMİL KÜÇÜK',          category: 'Operatör'           },
+  { name: 'HACI ALİ GÜLEÇ',       category: 'Elektrik'           },
+];
+
+const DEFAULT_CATEGORIES = [
+  { id: 'cat1', name: 'Su Arıza Ekibi',   color: '#1565c0' },
+  { id: 'cat2', name: 'Kanal Arıza Ekibi', color: '#00695c' },
+  { id: 'cat3', name: 'Elektrik',           color: '#6a1b9a' },
+  { id: 'cat4', name: 'Kamyon Şoförü',      color: '#880e4f' },
+  { id: 'cat5', name: 'Operatör',           color: '#bf360c' },
+  { id: 'cat6', name: 'Şoför',              color: '#2e7d32' },
+];
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let state = {
+  user:       null,  // { username, role, name }
+  users:      {},
+  staff:      {},
+  categories: {},
+  shifts:     {},
+  weekStart:  null,
+  activeTab:  'weekly',
+  adminTab:   'staff',
+  assignCat:  null,
+  assignShift: SHIFT_DEF,
+};
+
+// ════════════════════════════════════════════
+// YARDIMCILAR
+// ════════════════════════════════════════════
+function fmtDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+function startOfWeek(d) {
+  const r = new Date(d); const day = r.getDay();
+  r.setDate(r.getDate() + (day === 0 ? -6 : 1 - day)); r.setHours(0,0,0,0); return r;
+}
+function isSameDay(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function initials(n) { return (n||'?').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function escHtml(s) { return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function showToast(msg, isErr) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (isErr ? ' err' : '');
+  setTimeout(() => t.className = 'toast', 2500);
+}
+function colorAlpha(hex, a) { return hex + a; }
+
+// ════════════════════════════════════════════
+// FIREBASE OKUMA / YAZMA
+// ════════════════════════════════════════════
+async function dbGet(path) {
+  const snap = await get(ref(db, path));
+  return snap.exists() ? snap.val() : null;
+}
+async function dbSet(path, val) { await set(ref(db, path), val); }
+async function dbPush(path, val) { return await push(ref(db, path), val); }
+async function dbRemove(path) { await remove(ref(db, path)); }
+
+// ════════════════════════════════════════════
+// İLK VERİ KURULUMU
+// ════════════════════════════════════════════
+async function seedIfEmpty() {
+  // Kategorileri yükle
+  const existing = await dbGet('categories');
+  if (!existing) {
+    const catObj = {};
+    DEFAULT_CATEGORIES.forEach(c => {
+      catObj[c.id] = { name: c.name, color: c.color, order: parseInt(c.id.replace('cat','')) };
+    });
+    await dbSet('categories', catObj);
+  }
+
+  // Personeli yükle (kategorilerle eşleştirerek)
+  const existingStaff = await dbGet('staff');
+  if (!existingStaff) {
+    // Güncel kategori listesini al (az önce yüklemiş olabiliriz)
+    const cats = await dbGet('categories') || {};
+    // Kategori adından id'ye eşleme oluştur
+    const catNameToId = {};
+    Object.entries(cats).forEach(([id, c]) => { catNameToId[c.name] = id; });
+
+    const staffObj = {};
+    DEFAULT_STAFF.forEach((s, i) => {
+      const catId = catNameToId[s.category] || 'cat1';
+      staffObj['staff' + (i+1)] = { name: s.name, categoryId: catId };
+    });
+    await dbSet('staff', staffObj);
+  }
+
+  // Varsayılan kullanıcıları yükle
+  const existingUsers = await dbGet('users');
+  if (!existingUsers) {
+    await dbSet('users', {
+      admin:    { name: 'Yönetici', role: 'yonetici', pwd: '1234' },
+      personel: { name: 'Personel', role: 'personel', pwd: '1234' },
+    });
+  }
+}
+
+async function loadAllData() {
+  const [users, staff, categories, shifts] = await Promise.all([
+    dbGet('users'), dbGet('staff'), dbGet('categories'), dbGet('shifts')
+  ]);
+  state.users      = users      || {};
+  state.staff      = staff      || {};
+  state.categories = categories || {};
+  state.shifts     = shifts     || {};
+}
+
+// ════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════
+async function doLogin() {
+  const username = document.getElementById('inp-user').value.trim();
+  const password = document.getElementById('inp-pass').value;
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-btn');
+
+  if (!username || !password) {
+    errEl.textContent = 'Kullanıcı adı ve şifre gerekli.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2"></i> Giriş yapılıyor...';
+  errEl.style.display = 'none';
+
+  try {
+    const userData = await dbGet('users/' + username);
+    if (userData && String(userData.pwd) === String(password)) {
+      state.user = { username, role: userData.role, name: userData.name };
+      sessionStorage.setItem('nobet_user', JSON.stringify(state.user));
+      await enterApp();
+    } else {
+      errEl.textContent = 'Kullanıcı adı veya şifre hatalı.';
+      errEl.style.display = 'block';
+    }
+  } catch (e) {
+    errEl.textContent = 'Bağlantı hatası: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-login-2"></i> Giriş Yap';
+  }
+}
+
+function doLogout() {
+  state.user = null;
+  sessionStorage.removeItem('nobet_user');
+  document.getElementById('main-wrap').style.display = 'none';
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('admin-tab').style.display = 'none';
+  document.getElementById('inp-user').value = '';
+  document.getElementById('inp-pass').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  state.activeTab = 'weekly';
+}
+
+async function enterApp() {
+  document.getElementById('login-wrap').style.display = 'none';
+  const mw = document.getElementById('main-wrap');
+  mw.style.display = 'flex';
+
+  document.getElementById('user-info').innerHTML =
+    escHtml(state.user.name) + ' · ' + (state.user.role === 'yonetici' ? 'Yönetici' : 'Personel');
+
+  if (state.user.role === 'yonetici') {
+    document.getElementById('admin-tab').style.display = 'flex';
+  }
+
+  await loadAllData();
+  if (!state.weekStart) state.weekStart = startOfWeek(new Date());
+  renderWeekly();
+  if (state.user.role === 'yonetici') renderAdmin();
+}
+
+// ════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════
+function switchTab(tab) {
+  state.activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(tab + '-screen').classList.add('active');
+  if (tab === 'weekly') renderWeekly();
+  if (tab === 'admin') renderAdmin();
+}
+
+// ════════════════════════════════════════════
+// HAFTALIK EKRAN
+// ════════════════════════════════════════════
+function renderWeekly() {
+  const el = document.getElementById('weekly-screen');
+  if (!state.weekStart) state.weekStart = startOfWeek(new Date());
+  const weekEnd   = addDays(state.weekStart, 6);
+  const weekLabel = state.weekStart.toLocaleDateString('tr-TR',{day:'numeric',month:'short'}) + ' – ' +
+                    weekEnd.toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'});
+  const weekDates = WEEK_DAYS.map((_,i) => fmtDate(addDays(state.weekStart, i)));
+  const isAdmin   = state.user && state.user.role === 'yonetici';
+
+  const cats  = Object.entries(state.categories).sort((a,b) => (a[1].order||0)-(b[1].order||0));
+  const staff = state.staff || {};
+  const shifts = state.shifts || {};
+
+  // Haftalık shift'leri al
+  function getShiftsFor(catId, dateStr) {
+    return Object.entries(shifts).filter(([,s]) => s.categoryId === catId && s.date === dateStr);
+  }
+
+  let headerCells = WEEK_DAYS.map((d,i) => {
+    const today = isSameDay(addDays(state.weekStart,i), new Date());
+    const num   = addDays(state.weekStart,i).getDate();
+    return `<th style="${today ? 'color:var(--primary)' : ''}">${d} ${num}</th>`;
+  }).join('');
+
+  let rows = '';
+  for (const [catId, cat] of cats) {
+    const color = cat.color || '#1a237e';
+    let cells = '';
+    for (let i = 0; i < 7; i++) {
+      const dayShifts = getShiftsFor(catId, weekDates[i]);
+      if (dayShifts.length > 0) {
+        const badges = dayShifts.map(([shiftId, sh]) => {
+          const person = staff[sh.staffId];
+          const name   = person ? person.name : '?';
+          const click  = isAdmin ? `onclick="openAssignModal('${catId}')"` : '';
+          return `<div class="week-name-badge" style="background:${colorAlpha(color,'22')};color:${color}" ${click}>${escHtml(name)}</div>`;
+        }).join('');
+        cells += `<td><div class="week-names-cell">${badges}</div></td>`;
+      } else {
+        const click = isAdmin ? `onclick="openAssignModal('${catId}')" style="cursor:pointer"` : '';
+        cells += `<td><span class="week-empty" ${click}>–</span></td>`;
+      }
+    }
+    const addBtn = isAdmin
+      ? `<button class="week-cat-add" onclick="openAssignModal('${catId}')"><i class="ti ti-plus"></i></button>`
+      : '';
+    rows += `<tr>
+      <td style="border-left-color:${color}">
+        <div class="week-cat-label"><span>${escHtml(cat.name)}</span>${addBtn}</div>
+      </td>${cells}
+    </tr>`;
+  }
+
+  el.innerHTML = `
+    <div class="date-nav">
+      <button class="date-nav-btn" onclick="changeWeek(-1)"><i class="ti ti-chevron-left"></i></button>
+      <div class="date-nav-center" onclick="goThisWeek()">
+        <div class="date-nav-day">Hafta</div>
+        <div class="date-nav-date">${weekLabel}</div>
+      </div>
+      <button class="date-nav-btn" onclick="changeWeek(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+
+    ${isAdmin ? `<div class="summary-row">
+      <div class="summary-text">Atamak için <b>+</b> veya isme tıklayın</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-clear" onclick="clearWeekShifts()"><i class="ti ti-eraser"></i> Temizle</button>
+        <button class="btn-add" onclick="openAssignModal()"><i class="ti ti-plus"></i> Ekle</button>
+      </div>
+    </div>` : ''}
+
+    <div class="week-table-wrap">
+      <table class="week-table">
+        <thead><tr><th style="text-align:left">Kategori</th>${headerCells}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function changeWeek(d) { state.weekStart = addDays(state.weekStart, d*7); renderWeekly(); }
+function goThisWeek()  { state.weekStart = startOfWeek(new Date()); renderWeekly(); }
+
+async function clearWeekShifts() {
+  if (!confirm('Bu haftanın tüm nöbet atamaları silinsin mi?')) return;
+  const weekDates = WEEK_DAYS.map((_,i) => fmtDate(addDays(state.weekStart, i)));
+  try {
+    const toDelete = Object.entries(state.shifts || {})
+      .filter(([,s]) => weekDates.includes(s.date)).map(([id]) => id);
+    await Promise.all(toDelete.map(id => dbRemove('shifts/' + id)));
+    await loadAllData();
+    renderWeekly();
+    showToast('Haftalık atamalar temizlendi.');
+  } catch (e) { showToast('Hata: ' + e.message, true); }
+}
+
+// ════════════════════════════════════════════
+// NÖBET ATAMA MODAL
+// ════════════════════════════════════════════
+let assignState = { catId: null };
+
+function openAssignModal(catId) {
+  const cats = Object.entries(state.categories).sort((a,b) => (a[1].order||0)-(b[1].order||0));
+  assignState.catId = catId || (cats[0] ? cats[0][0] : null);
+
+  renderAssignCatChips();
+  renderAssignStaff();
+  renderAssignDays();
+  document.getElementById('assign-modal').classList.add('active');
+}
+
+function closeAssignModal() { document.getElementById('assign-modal').classList.remove('active'); }
+
+function renderAssignCatChips() {
+  const cats = Object.entries(state.categories).sort((a,b) => (a[1].order||0)-(b[1].order||0));
+  document.getElementById('assign-cat-chips').innerHTML = cats.map(([id, cat]) => {
+    const sel = id === assignState.catId;
+    return `<div class="chip ${sel?'selected':''}" onclick="selectAssignCat('${id}')">
+      <span class="chip-dot" style="background:${sel?'#fff':(cat.color||'#1a237e')}"></span>${escHtml(cat.name)}
+    </div>`;
+  }).join('');
+}
+
+function selectAssignCat(id) {
+  assignState.catId = id;
+  renderAssignCatChips();
+  renderAssignStaff();
+  renderAssignDays();
+}
+
+function renderAssignStaff() {
+  const sel = document.getElementById('assign-staff-sel');
+  const filtered = Object.entries(state.staff || {})
+    .filter(([,s]) => s.categoryId === assignState.catId);
+  if (filtered.length === 0) {
+    sel.innerHTML = `<option value="">Bu kategoriye tanımlı personel yok</option>`;
+  } else {
+    sel.innerHTML = filtered.map(([id,s]) => `<option value="${id}">${escHtml(s.name)}</option>`).join('');
+  }
+}
+
+function renderAssignDays() {
+  if (!state.weekStart) state.weekStart = startOfWeek(new Date());
+  const weekDates = WEEK_DAYS.map((_,i) => fmtDate(addDays(state.weekStart, i)));
+  const el = document.getElementById('assign-day-checks');
+  el.innerHTML = weekDates.map((dateStr, i) => {
+    const dayNum = addDays(state.weekStart, i).getDate();
+    const existing = Object.values(state.shifts || {})
+      .filter(s => s.date === dateStr && s.categoryId === assignState.catId);
+    const hasEntry = existing.length > 0;
+    const existingNames = existing.map(s => {
+      const p = state.staff[s.staffId];
+      return p ? p.name.split(' ')[0] : '?';
+    }).join(', ');
+    return `<div class="day-check${hasEntry?' has-entry':''}" id="dc-${i}" onclick="toggleDayCheck(${i})" data-date="${dateStr}">
+      <div class="day-check-box" id="dcb-${i}"></div>
+      <div>
+        <div>${WEEK_DAYS[i]} ${dayNum}</div>
+        ${hasEntry ? `<div style="font-size:10px;color:var(--text-3)">${escHtml(existingNames)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDayCheck(i) {
+  const el  = document.getElementById('dc-' + i);
+  const box = document.getElementById('dcb-' + i);
+  el.classList.toggle('checked');
+  box.innerHTML = el.classList.contains('checked') ? '✓' : '';
+}
+
+async function saveAssignment() {
+  const staffId = document.getElementById('assign-staff-sel').value;
+  if (!assignState.catId || !staffId) { showToast('Kategori ve personel seçin.', true); return; }
+
+  const selectedDays = [];
+  document.querySelectorAll('#assign-day-checks .day-check.checked').forEach(el => {
+    selectedDays.push(el.dataset.date);
+  });
+  if (selectedDays.length === 0) { showToast('En az bir gün seçin.', true); return; }
+
+  const btn = document.getElementById('assign-save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2"></i> Kaydediliyor...';
+
+  try {
+    for (const dateStr of selectedDays) {
+      // Aynı kişi aynı gün aynı kategoride zaten varsa ekleme
+      const dup = Object.entries(state.shifts || {}).find(([,s]) =>
+        s.date === dateStr && s.categoryId === assignState.catId && s.staffId === staffId
+      );
+      if (!dup) {
+        await dbPush('shifts', {
+          date: dateStr,
+          categoryId: assignState.catId,
+          staffId: staffId,
+          shift: SHIFT_DEF,
+        });
+      }
+    }
+    await loadAllData();
+    renderWeekly();
+    closeAssignModal();
+    showToast(selectedDays.length + ' gün için nöbetçi atandı.');
+  } catch (e) {
+    showToast('Hata: ' + e.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-check"></i> Kaydet';
+  }
+}
+
+// ════════════════════════════════════════════
+// YÖNETİM EKRANI
+// ════════════════════════════════════════════
+let newCatColor = CAT_COLORS[0];
+
+function renderAdmin() {
+  const el = document.getElementById('admin-screen');
+  const tab = state.adminTab;
+  const cats  = Object.entries(state.categories).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
+  const staff = Object.entries(state.staff || {});
+
+  let html = `<div class="admin-tabs">
+    <div class="admin-tab ${tab==='staff'?'active':''}" onclick="setAdminTab('staff')">Personel</div>
+    <div class="admin-tab ${tab==='categories'?'active':''}" onclick="setAdminTab('categories')">Kategoriler</div>
+    <div class="admin-tab ${tab==='users'?'active':''}" onclick="setAdminTab('users')">Kullanıcılar</div>
+  </div>`;
+
+  if (tab === 'staff') {
+    html += `<div class="form-card"><h3>Yeni Personel Ekle</h3>
+      <div class="form-field"><label>Ad Soyad</label><input id="ns-name" type="text" placeholder="Örn: Mehmet Demir" /></div>
+      <div class="form-field"><label>Kategori</label><select id="ns-cat">
+        ${cats.map(([id,c])=>`<option value="${id}">${escHtml(c.name)}</option>`).join('')}
+      </select></div>
+      <button class="btn-primary" onclick="addStaff()"><i class="ti ti-user-plus"></i> Ekle</button>
+    </div>
+    <div class="list-label">Kayıtlı Personel (${staff.length})</div>`;
+    for (const [id, s] of staff) {
+      const cat = state.categories[s.categoryId];
+      const badge = cat
+        ? `<span class="staff-cat-badge" style="background:${colorAlpha(cat.color||'#1a237e','22')};color:${cat.color||'#1a237e'}">${escHtml(cat.name)}</span>`
+        : '';
+      html += `<div class="list-row">
+        <div class="avatar">${initials(s.name)}</div>
+        <div class="list-row-name">${escHtml(s.name)}<div>${badge}</div></div>
+        <button class="btn-del" onclick="deleteStaff('${id}','${escHtml(s.name)}')"><i class="ti ti-trash"></i></button>
+      </div>`;
+    }
+
+  } else if (tab === 'categories') {
+    const colorDots = CAT_COLORS.map(c =>
+      `<div class="color-dot${c===newCatColor?' sel':''}" style="background:${c}" onclick="selectNewCatColor('${c}')"></div>`
+    ).join('');
+    html += `<div class="form-card"><h3>Yeni Kategori Ekle</h3>
+      <div class="form-field"><label>Kategori Adı</label><input id="nc-name" type="text" placeholder="Örn: Gece Ekibi" /></div>
+      <div class="form-field"><label>Renk</label><div class="color-row" id="cat-color-row">${colorDots}</div></div>
+      <button class="btn-primary" onclick="addCategory()"><i class="ti ti-folder-plus"></i> Ekle</button>
+    </div>
+    <div class="list-label">Kategoriler (${cats.length})</div>`;
+    for (const [id, c] of cats) {
+      html += `<div class="list-row">
+        <div class="cat-dot-lg" style="background:${c.color||'#1a237e'}"></div>
+        <div class="list-row-name">${escHtml(c.name)}</div>
+        <button class="btn-del" onclick="deleteCategory('${id}','${escHtml(c.name)}')"><i class="ti ti-trash"></i></button>
+      </div>`;
+    }
+
+  } else if (tab === 'users') {
+    html += `<div class="form-card"><h3>Yeni Kullanıcı Ekle</h3>
+      <div class="form-field"><label>Kullanıcı Adı</label><input id="nu-user" type="text" placeholder="ahmet" /></div>
+      <div class="form-field"><label>Şifre</label><input id="nu-pwd" type="text" placeholder="şifre" /></div>
+      <div class="form-field"><label>Ad Soyad</label><input id="nu-name" type="text" placeholder="Ahmet Yılmaz" /></div>
+      <div class="form-field"><label>Rol</label><select id="nu-role">
+        <option value="personel">Personel</option>
+        <option value="yonetici">Yönetici</option>
+      </select></div>
+      <button class="btn-primary" onclick="addUser()"><i class="ti ti-user-plus"></i> Ekle</button>
+    </div>
+    <div class="list-label">Kullanıcılar</div>`;
+    for (const [uname, u] of Object.entries(state.users)) {
+      const roleLabel = u.role === 'yonetici' ? 'Yönetici' : 'Personel';
+      html += `<div class="list-row">
+        <div class="avatar">${initials(u.name)}</div>
+        <div class="list-row-name">${escHtml(u.name)} <span style="font-size:11px;color:var(--text-2)">(${escHtml(uname)})</span>
+          <div><span class="staff-cat-badge" style="background:var(--primary-light);color:var(--primary)">${roleLabel}</span></div>
+        </div>
+        ${uname !== state.user.username ? `<button class="btn-del" onclick="deleteUser('${uname}')"><i class="ti ti-trash"></i></button>` : ''}
+      </div>`;
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+function setAdminTab(tab) { state.adminTab = tab; renderAdmin(); }
+function selectNewCatColor(c) { newCatColor = c; renderAdmin(); }
+
+async function addStaff() {
+  const name  = document.getElementById('ns-name').value.trim();
+  const catId = document.getElementById('ns-cat').value;
+  if (!name) { showToast('Ad Soyad girin.', true); return; }
+  try {
+    await dbPush('staff', { name, categoryId: catId });
+    await loadAllData(); renderAdmin(); showToast('Personel eklendi.');
+  } catch (e) { showToast('Hata: ' + e.message, true); }
+}
+
+async function deleteStaff(id, name) {
+  if (!confirm(name + ' silinsin mi?')) return;
+  try {
+    await dbRemove('staff/' + id);
+    await loadAllData(); renderAdmin(); showToast('Personel silindi.');
+  } catch (e) { showToast('Hata: ' + e.message, true); }
+}
+
+async function addCategory() {
+  const name = document.getElementById('nc-name').value.trim();
+  if (!name) { showToast('Kategori adı girin.', true); return; }
+  const order = Object.keys(state.categories).length + 1;
+  try {
+    await dbPush('categories', { name, color: newCatColor, order });
+    await loadAllData(); renderAdmin(); renderWeekly(); showToast('Kategori eklendi.');
+  } catch (e) { showToast('Hata: ' + e.message, true); }
+}
+
+async function deleteCategory(id, name) {
+  if (!confirm(name + ' silinsin mi?')) return;
+  try {
+    await dbRemove('categories/' + id);
+    await loadAllData(); renderAdmin(); renderWeekly(); showToast('Kategori silindi.');
+  } catch (e) { showToast('Hata: ' + e.message, true); }
+}
+
+async function addUser() {
+  const username = document.getElementById('nu-user').value.trim();
+  const pwd      = document.getElementById('nu-pwd').value;
+  const name     = document.getElementById('nu-name').value.trim();
+  const role     = document.getElementById('nu-role').value;
+  if (!username || !pwd || !name) { showToast('Tüm alanları doldurun.', true); return; }
+  try {
+    await dbSet('users/' + username, { name, role, pwd });
+    await loadAllData(); renderAdmin(); showToast('Kullanıcı eklendi.');
+  } catch (e) { showToast('Hata: ' + e.message, true); }
+}
+
+async function deleteUser(username) {
+  if (!confirm(username + ' kullanıcısı silinsin mi?')) return;
+  try {
+    await dbRemove('users/' + username);
+    await loadAllData(); renderAdmin(); showToast('Kullanıcı silindi.');
+  } catch (e) { showToast('Hata: ' + e.message, true); }
+}
+
+// ════════════════════════════════════════════
+// GLOBAL FONKSİYONLAR (onclick için window'a ata)
+// ════════════════════════════════════════════
+Object.assign(window, {
+  doLogin, doLogout, enterApp, switchTab,
+  changeWeek, goThisWeek, clearWeekShifts,
+  openAssignModal, closeAssignModal, selectAssignCat, toggleDayCheck, saveAssignment,
+  renderAdmin, setAdminTab, selectNewCatColor,
+  addStaff, deleteStaff, addCategory, deleteCategory, addUser, deleteUser,
+});
+
+// ════════════════════════════════════════════
+// BAŞLANGIÇ
+// ════════════════════════════════════════════
+(async function init() {
+  await seedIfEmpty();
+
+  // Oturum devam ediyorsa otomatik giriş
+  const saved = sessionStorage.getItem('nobet_user');
+  if (saved) {
+    try { state.user = JSON.parse(saved); await enterApp(); return; } catch (e) {}
+  }
+})();
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
